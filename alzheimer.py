@@ -7,15 +7,12 @@ from PIL import Image
 st.set_page_config(page_title="Alzheimer Classification", layout="centered", page_icon="🧠")
 
 # --- FIX: DUMMY FUNCTION ---
-# Fungsi ini digunakan sebagai placeholder agar Keras tidak error saat mencari 
-# fungsi 'preprocess_input' yang tertanam di layer Lambda model.
 def dummy_preprocess(x):
     return x
 
 # --- FUNGSI LOAD MODEL ---
 @st.cache_resource
 def load_all_models(model_choice):
-    # Kita beri tahu Keras bahwa 'preprocess_input' sekarang mengarah ke fungsi dummy kita
     custom_objects = {
         "Lambda": tf.keras.layers.Lambda,
         "preprocess_input": dummy_preprocess 
@@ -29,7 +26,7 @@ def load_all_models(model_choice):
         elif model_choice == "ResNet50 (Pretrained)":
             return tf.keras.models.load_model('models/model_alzheimer_resnet_optimized.keras', custom_objects=custom_objects)
     except Exception as e:
-        st.error(f"Gagal memuat model: {e}")
+        st.error(f"Gagal memuat model {model_choice}: {e}")
         return None
 
 # Daftar Kelas
@@ -56,31 +53,38 @@ if uploaded_file is not None and model is not None:
         image = Image.open(uploaded_file).convert('RGB')
         st.image(image, caption="Gambar Terunggah", use_container_width=True)
 
-    # --- PROSES PREPROCESSING ---
+    # --- PROSES PREPROCESSING & PREDIKSI ---
     with st.spinner('Sedang menganalisis...'):
+        # 1. Resize
         img = image.resize((224, 224))
         img_array = tf.keras.preprocessing.image.img_to_array(img)
         img_array = np.expand_dims(img_array, axis=0)
         
-        # PREPROCESSING MANUAL (Karena layer Lambda di dalam model sekarang 'kosong')
+        # 2. Preprocessing Manual berdasarkan Model
         if selected_model_name == "MobileNetV2 (Pretrained)":
             img_array = tf.keras.applications.mobilenet_v2.preprocess_input(img_array)
         elif selected_model_name == "ResNet50 (Pretrained)":
             img_array = tf.keras.applications.resnet50.preprocess_input(img_array)
         else:
-            # Untuk Base CNN biasanya normalisasi 0-1
             img_array = img_array / 255.0
         
-        # Prediksi
-        predictions = model.predict(img_array)
-        result_index = np.argmax(predictions[0])
-        confidence = np.max(predictions[0]) * 100
-
-    with col2:
-        st.subheader("Hasil Analisis")
-        st.info(f"**Model:** {selected_model_name}")
-        st.success(f"**Prediksi:** {class_names[result_index]}")
-        st.metric(label="Tingkat Keyakinan", value=f"{confidence:.2f}%")
+        # 3. Prediksi (MENGGUNAKAN CALL BUKAN PREDICT UNTUK MENGHINDARI BUG TENSOR)
+        try:
+            # Memanggil model secara langsung lebih stabil untuk Keras 3
+            preds_tensor = model(img_array, training=False)
+            predictions = preds_tensor.numpy() if hasattr(preds_tensor, 'numpy') else preds_tensor
+            
+            result_index = np.argmax(predictions[0])
+            confidence = np.max(predictions[0]) * 100
+            
+            with col2:
+                st.subheader("Hasil Analisis")
+                st.info(f"**Model:** {selected_model_name}")
+                st.success(f"**Prediksi:** {class_names[result_index]}")
+                st.metric(label="Tingkat Keyakinan", value=f"{confidence:.2f}%")
+                
+        except Exception as e:
+            st.error(f"Terjadi kesalahan saat prediksi: {e}")
 
 # Footer
 st.markdown("---")
