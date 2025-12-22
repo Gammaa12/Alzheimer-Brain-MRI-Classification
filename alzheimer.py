@@ -9,13 +9,19 @@ st.set_page_config(page_title="Alzheimer Classification", layout="centered")
 # --- FUNGSI LOAD MODEL ---
 @st.cache_resource
 def load_all_models(model_choice):
-    # Tambahkan path folder 'models/' sebelum nama file
-    if model_choice == "Base CNN (Custom)":
-        return tf.keras.models.load_model('models/model_alzheimer_base.h5')
-    elif model_choice == "MobileNetV2 (Pretrained)":
-        return tf.keras.models.load_model('models/model_alzheimer_mobilenet.keras')
-    elif model_choice == "ResNet50 (Pretrained)":
-        return tf.keras.models.load_model('models/model_alzheimer_resnet_optimized.keras')
+    # Tambahkan custom_objects agar Keras mengenali layer Lambda jika ada
+    custom_objects = {"Lambda": tf.keras.layers.Lambda}
+    
+    try:
+        if model_choice == "Base CNN (Custom)":
+            return tf.keras.models.load_model('models/model_alzheimer_base.h5')
+        elif model_choice == "MobileNetV2 (Pretrained)":
+            return tf.keras.models.load_model('models/model_alzheimer_mobilenet.keras', custom_objects=custom_objects)
+        elif model_choice == "ResNet50 (Pretrained)":
+            return tf.keras.models.load_model('models/model_alzheimer_resnet_optimized.keras', custom_objects=custom_objects)
+    except Exception as e:
+        st.error(f"Gagal memuat model: {e}")
+        return None
 
 # Daftar Kelas (Pastikan urutan sesuai dengan alfabet folder dataset Anda)
 class_names = ['Mild Demented', 'Moderate Demented', 'Non Demented', 'Very Mild Demented']
