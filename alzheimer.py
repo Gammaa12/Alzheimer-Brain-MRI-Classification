@@ -9,12 +9,13 @@ st.set_page_config(page_title="Alzheimer Classification", layout="centered")
 # --- FUNGSI LOAD MODEL ---
 @st.cache_resource
 def load_all_models(model_choice):
+    # Tambahkan path folder 'models/' sebelum nama file
     if model_choice == "Base CNN (Custom)":
-        return tf.keras.models.load_model('model_alzheimer_base.h5')
+        return tf.keras.models.load_model('models/model_alzheimer_base.h5')
     elif model_choice == "MobileNetV2 (Pretrained)":
-        return tf.keras.models.load_model('model_alzheimer_mobilenet.keras')
+        return tf.keras.models.load_model('models/model_alzheimer_mobilenet.keras')
     elif model_choice == "ResNet50 (Pretrained)":
-        return tf.keras.models.load_model('model_alzheimer_resnet_optimized.keras')
+        return tf.keras.models.load_model('models/model_alzheimer_resnet_optimized.keras')
 
 # Daftar Kelas (Pastikan urutan sesuai dengan alfabet folder dataset Anda)
 class_names = ['Mild Demented', 'Moderate Demented', 'Non Demented', 'Very Mild Demented']
