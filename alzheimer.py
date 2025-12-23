@@ -1,24 +1,27 @@
 import streamlit as st
 import os
+import json
 
-# Set environment agar Keras menggunakan backend TensorFlow
+# 1. SET BACKEND SEBELUM IMPORT KERAS (Penting untuk Keras 3)
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
 import keras
 import numpy as np
 import pandas as pd
 from PIL import Image
-import json
 import plotly.express as px
 
+# 2. KONFIGURASI KEAMANAN KERAS 3
 keras.config.enable_unsafe_deserialization()
 
+# 3. FIX MARSHAL ERROR: Definisi Custom Layer untuk menggantikan Lambda
 @keras.saving.register_keras_serializable()
 class FixedLambda(keras.layers.Layer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
     def call(self, x):
-        return x # Fungsi identitas: hanya meneruskan data
+        # Mengembalikan input apa adanya (Identity Layer)
+        return x
 
 def dummy_preprocess(x):
     return x
@@ -41,11 +44,14 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # --- KONFIGURASI JALUR MODEL ---
-MODEL_DIR = "models"
+# Menggunakan os.path.join agar path kompatibel dengan Windows (Lokal) dan Linux (Cloud)
+BASE_DIR = os.path.dirname(__file__)
+MODEL_DIR = os.path.join(BASE_DIR, "models")
+
 MODEL_PATHS = {
-    "Base CNN (Custom)": f"{MODEL_DIR}/model_alzheimer_base.keras",
-    "MobileNetV2 (Pretrained)": f"{MODEL_DIR}/model_alzheimer_mobilenet.keras",
-    "VGG16 (Pretrained)": f"{MODEL_DIR}/vgg16_best_model.keras"
+    "Base CNN (Custom)": os.path.join(MODEL_DIR, "model_alzheimer_base.keras"),
+    "MobileNetV2 (Pretrained)": os.path.join(MODEL_DIR, "model_alzheimer_mobilenet.keras"),
+    "VGG16 (Pretrained)": os.path.join(MODEL_DIR, "vgg16_best_model.keras")
 }
 
 STADIUM_DESC = {
@@ -55,29 +61,26 @@ STADIUM_DESC = {
     'Moderate Demented': 'Sedang: Penurunan fungsi otak signifikan, butuh pendampingan.'
 }
 
-# --- FUNGSI CORE (Keras 3 Compatible) ---
+# --- FUNGSI CORE ---
 @st.cache_resource
 def load_alz_model(model_key):
-    paths = {
-        "Base CNN (Custom)": "models/model_alzheimer_base.keras",
-        "MobileNetV2 (Pretrained)": "models/model_alzheimer_mobilenet.keras",
-        "VGG16 (Pretrained)": "models/vgg16_best_model.keras"
-    }
-    
     # Kita paksa Keras menganggap layer 'Lambda' adalah 'FixedLambda' kita
     custom_objects = {
         "Lambda": FixedLambda, 
         "preprocess_input": dummy_preprocess
     }
     
-    file_path = paths.get(model_key)
+    file_path = MODEL_PATHS.get(model_key)
     
     if not os.path.exists(file_path):
         st.error(f"File {file_path} tidak ditemukan!")
+        # Debug: Tampilkan isi folder jika file hilang
+        if os.path.exists(MODEL_DIR):
+            st.write("File yang tersedia di folder models:", os.listdir(MODEL_DIR))
         return None
 
     try:
-        # Load dengan semua pengaman dimatikan
+        # Load dengan safe_mode=False untuk Keras 3
         model = keras.models.load_model(
             file_path,
             custom_objects=custom_objects,
@@ -90,7 +93,6 @@ def load_alz_model(model_key):
         return None
 
 def preprocess_image_keras3(image, model_name):
-    # Menggunakan utility Keras 3 untuk konversi array
     img = image.convert('RGB').resize((224, 224))
     img_array = keras.utils.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0)
@@ -105,7 +107,8 @@ def preprocess_image_keras3(image, model_name):
 
 # Load Label Kelas
 try:
-    with open(f'{MODEL_DIR}/class_names', 'r') as f:
+    class_json_path = os.path.join(MODEL_DIR, "class_names")
+    with open(class_json_path, 'r') as f:
         class_names = json.load(f)
 except:
     class_names = ['Mild Demented', 'Moderate Demented', 'Non Demented', 'Very Mild Demented']
@@ -157,21 +160,20 @@ if analysis_mode == "Analisis Tunggal":
                         })
             
             if model_option == "Bandingkan Semua Model":
-                df = pd.DataFrame(all_results)
-                st.dataframe(df.style.format({"Akurasi": "{:.2%}"}), hide_index=True)
-                
-                # Visualisasi dengan Plotly
-                fig = px.bar(df, x='Model', y='Akurasi', color='Prediksi Stadium', 
-                             text_auto='.2%', title="Konsistensi Prediksi Lintas Model")
-                st.plotly_chart(fig, use_container_width=True)
+                if all_results:
+                    df = pd.DataFrame(all_results)
+                    st.table(df) # Menggunakan st.table agar lebih bersih secara akademik
+                    
+                    fig = px.bar(df, x='Model', y='Akurasi', color='Prediksi Stadium', 
+                                 text_auto='.2%', title="Konsistensi Prediksi Lintas Model")
+                    st.plotly_chart(fig, use_container_width=True)
             else:
-                res = all_results[0]
-                st.metric("Stadium Terdeteksi", res["Prediksi Stadium"])
-                st.progress(float(res["Akurasi"]))
-                st.write(f"**Tingkat Keyakinan:** `{res['Akurasi']:.2%}`")
-                
-                # Deskripsi Akademik
-                st.info(f"**Catatan Klinis:** {STADIUM_DESC.get(res['Prediksi Stadium'], 'Informasi tidak tersedia.')}")
+                if all_results:
+                    res = all_results[0]
+                    st.metric("Stadium Terdeteksi", res["Prediksi Stadium"])
+                    st.progress(float(res["Akurasi"]))
+                    st.write(f"**Tingkat Keyakinan:** `{res['Akurasi']:.2%}`")
+                    st.info(f"**Catatan Klinis:** {STADIUM_DESC.get(res['Prediksi Stadium'], 'Informasi tidak tersedia.')}")
 
 elif analysis_mode == "Analisis Batch (Banyak)":
     files = st.file_uploader("Unggah koleksi MRI", type=["jpg", "png"], accept_multiple_files=True)
@@ -181,22 +183,22 @@ elif analysis_mode == "Analisis Batch (Banyak)":
             st.warning("Silakan pilih satu model spesifik di sidebar untuk Analisis Batch.")
         else:
             model = load_alz_model(model_option)
-            batch_list = []
-            
-            with st.spinner(f'Menganalisis {len(files)} citra...'):
-                for f in files:
-                    img = Image.open(f)
-                    proc = preprocess_image_keras3(img, model_option)
-                    pred = model.predict(proc, verbose=0)[0]
-                    idx = np.argmax(pred)
-                    batch_list.append({
-                        "Nama File": f.name,
-                        "Stadium": class_names[idx],
-                        "Confidence": f"{pred[idx]:.2%}"
-                    })
-            
-            st.subheader(f"Hasil Batch - {model_option}")
-            st.dataframe(pd.DataFrame(batch_list), use_container_width=True)
+            if model:
+                batch_list = []
+                with st.spinner(f'Menganalisis {len(files)} citra...'):
+                    for f in files:
+                        img = Image.open(f)
+                        proc = preprocess_image_keras3(img, model_option)
+                        pred = model.predict(proc, verbose=0)[0]
+                        idx = np.argmax(pred)
+                        batch_list.append({
+                            "Nama File": f.name,
+                            "Stadium": class_names[idx],
+                            "Confidence": f"{pred[idx]:.2%}"
+                        })
+                
+                st.subheader(f"Hasil Batch - {model_option}")
+                st.dataframe(pd.DataFrame(batch_list), use_container_width=True)
 
 # --- FOOTER ---
 st.markdown("---")
