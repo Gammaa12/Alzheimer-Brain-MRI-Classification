@@ -1,4 +1,7 @@
-streamlit
-tensorflow
+streamlit>=1.30.0
+tensorflow==2.19.0
+keras==3.10.0
+numpy<2.0.0  # Sangat penting: TF 2.19 belum mendukung NumPy 2.x sepenuhnya
 Pillow
-numpy
+plotly
+pandas
