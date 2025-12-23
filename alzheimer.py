@@ -5,8 +5,6 @@ import os
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
 import keras
-keras.config.enable_unsafe_deserialization()
-
 import numpy as np
 import pandas as pd
 from PIL import Image
@@ -49,15 +47,11 @@ STADIUM_DESC = {
 @st.cache_resource
 def load_alz_model(model_key):
     try:
-        return keras.models.load_model(
-            MODEL_PATHS[model_key],
-            compile=False,
-            safe_mode=False   # ← PENTING
-        )
+        # Keras 3 menangani loading file .keras secara native lebih baik
+        return keras.models.load_model(MODEL_PATHS[model_key], compile=False)
     except Exception as e:
         st.error(f"Gagal memuat {model_key}: {str(e)}")
         return None
-
 
 def preprocess_image_keras3(image, model_name):
     # Menggunakan utility Keras 3 untuk konversi array
