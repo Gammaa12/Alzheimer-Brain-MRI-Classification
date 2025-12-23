@@ -47,12 +47,24 @@ STADIUM_DESC = {
 
 # --- FUNGSI CORE (Keras 3 Compatible) ---
 @st.cache_resource
-def load_alz_model(model_key):
+def load_model_file(model_key):
+    # Kita definisikan custom_objects agar Keras tahu apa itu 'preprocess_input'
+    # jika model mencarinya saat loading.
+    custom_objects = {
+        "Lambda": tf.keras.layers.Lambda,
+        "preprocess_input": dummy_preprocess 
+    }
+    
     try:
-        # Keras 3 menangani loading file .keras secara native lebih baik
-        return keras.models.load_model(MODEL_PATHS[model_key], compile=False)
+        # Tambahkan safe_mode=False di sini
+        return tf.keras.models.load_model(
+            MODEL_PATHS[model_key], 
+            custom_objects=custom_objects,
+            compile=False,
+            safe_mode=False  # INI KUNCINYA UNTUK KERAS 3
+        )
     except Exception as e:
-        st.error(f"Gagal memuat {model_key}: {str(e)}")
+        st.error(f"Error loading {model_key}: {e}")
         return None
 
 def preprocess_image_keras3(image, model_name):
