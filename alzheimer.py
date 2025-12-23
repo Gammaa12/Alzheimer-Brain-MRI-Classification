@@ -13,6 +13,9 @@ import plotly.express as px
 
 keras.config.enable_unsafe_deserialization()
 
+def dummy_preprocess(x):
+    return x
+
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(
     page_title="Neuro-Diagnostic Lab | Alzheimer Analysis",
@@ -47,25 +50,43 @@ STADIUM_DESC = {
 
 # --- FUNGSI CORE (Keras 3 Compatible) ---
 @st.cache_resource
-def load_model_file(model_key):
-    # Kita definisikan custom_objects agar Keras tahu apa itu 'preprocess_input'
-    # jika model mencarinya saat loading.
-    custom_objects = {
-        "Lambda": tf.keras.layers.Lambda,
-        "preprocess_input": dummy_preprocess 
+def load_alz_model(model_key):
+    # Mapping path manual agar lebih aman
+    paths = {
+        "Base CNN (Custom)": "models/model_alzheimer_base.keras",
+        "MobileNetV2 (Pretrained)": "models/model_alzheimer_mobilenet.keras",
+        "VGG16 (Pretrained)": "models/vgg16_best_model.keras"
     }
     
+    # Custom objects untuk menangani layer Lambda & preprocess bawaan model
+    custom_objects = {
+        "preprocess_input": dummy_preprocess,
+        "Lambda": keras.layers.Lambda
+    }
+    
+    file_path = paths.get(model_key)
+    
+    # Debugging check untuk Streamlit Cloud
+    if not os.path.exists(file_path):
+        st.error(f"File {file_path} tidak ditemukan! Pastikan sudah di-push ke GitHub.")
+        return None
+
     try:
-        # Tambahkan safe_mode=False di sini
-        return tf.keras.models.load_model(
-            MODEL_PATHS[model_key], 
+        # Pemuatan model dengan konfigurasi Keras 3 yang paling permisif
+        return keras.models.load_model(
+            file_path,
             custom_objects=custom_objects,
             compile=False,
-            safe_mode=False  # INI KUNCINYA UNTUK KERAS 3
+            safe_mode=False  # Mengizinkan deserialization Lambda
         )
     except Exception as e:
-        st.error(f"Error loading {model_key}: {e}")
-        return None
+        # Jika masih gagal karena Lambda, gunakan cara 'force load'
+        st.warning(f"Percobaan pertama gagal, mencoba metode alternatif untuk {model_key}...")
+        try:
+            return keras.models.load_model(file_path, compile=False, safe_mode=False)
+        except:
+            st.error(f"Gagal total memuat model: {str(e)}")
+            return None
 
 def preprocess_image_keras3(image, model_name):
     # Menggunakan utility Keras 3 untuk konversi array
