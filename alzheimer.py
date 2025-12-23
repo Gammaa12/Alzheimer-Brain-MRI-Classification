@@ -5,6 +5,8 @@ import os
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
 import keras
+keras.config.enable_unsafe_deserialization()
+
 import numpy as np
 import pandas as pd
 from PIL import Image
