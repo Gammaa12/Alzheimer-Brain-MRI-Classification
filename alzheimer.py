@@ -47,8 +47,12 @@ STADIUM_DESC = {
 @st.cache_resource
 def load_alz_model(model_key):
     try:
-        # Keras 3 menangani loading file .keras secara native lebih baik
-        return keras.models.load_model(MODEL_PATHS[model_key], compile=False)
+        # Tambahkan safe_mode=False untuk mengizinkan layer Lambda
+        return keras.models.load_model(
+            MODEL_PATHS[model_key], 
+            compile=False, 
+            safe_mode=False
+        )
     except Exception as e:
         st.error(f"Gagal memuat {model_key}: {str(e)}")
         return None
