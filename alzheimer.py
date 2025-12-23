@@ -44,14 +44,32 @@ STADIUM_DESC = {
 }
 
 # --- FUNGSI CORE (Keras 3 Compatible) ---
+import marshal
+
 @st.cache_resource
 def load_alz_model(model_key):
+    # Solusi untuk error marshal: Kita beri tahu Keras cara menangani Lambda secara manual
+    def identity_func(x):
+        return x
+
+    custom_objects = {
+        "Lambda": keras.layers.Lambda(identity_func), # Mengganti lambda berbahaya dengan fungsi identitas
+        "preprocess_input": dummy_preprocess 
+    }
+    
+    # Pastikan path folder benar. Gunakan os.path untuk keamanan
+    file_path = MODEL_PATHS[model_key]
+    
+    if not os.path.exists(file_path):
+        st.error(f"File TIDAK ditemukan di: {file_path}. Pastikan folder 'models' dan file sudah di-push ke GitHub.")
+        return None
+
     try:
-        # Tambahkan safe_mode=False untuk mengizinkan layer Lambda
         return keras.models.load_model(
-            MODEL_PATHS[model_key], 
+            file_path, 
             compile=False, 
-            safe_mode=False
+            safe_mode=False, 
+            custom_objects=custom_objects
         )
     except Exception as e:
         st.error(f"Gagal memuat {model_key}: {str(e)}")
