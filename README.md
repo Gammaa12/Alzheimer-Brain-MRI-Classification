@@ -235,6 +235,7 @@ Seluruh library yang diperlukan telah disediakan dalam file `requirements.txt`. 
 Jalankan perintah berikut di terminal:
 ```bash
 pip install -r requirements.txt
+```
 
 #### Cara 2: Instalasi Manual
 Jika ingin menginstal satu per satu (misal menggunakan PDM atau Pip):
@@ -242,15 +243,17 @@ Jika ingin menginstal satu per satu (misal menggunakan PDM atau Pip):
 pip install streamlit==1.37.0
 pip install tensorflow==2.19.0
 pip install keras==3.10.0
+```
 
 #### Menjalankan Sistem Prediksi
 Untuk menjalankan dashboard sistem prediksi di lokal, buka terminal dan jalankan perintah berikut:
 ```bash
 streamlit run alzheimer.py
+```
 
 #### Melatih Ulang Model
 Jika Anda ingin melatih model dari awal menggunakan dataset baru, silakan jalankan file notebook yang tersedia:
-- Buka file Notebook-Model.ipynb di Google Colab.
+- Buka file Klasifikasi_Penyakit_Alzheimer.ipynb di Google Colab.
 - Pastikan runtime menggunakan GPU untuk proses yang lebih cepat.
 
 ---
@@ -309,7 +312,12 @@ Dashboard ini merupakan implementasi praktis dari **riset klasifikasi neurodegen
 
 ---
 
-
+## 👤 Biodata Pengembang
+* **Nama**: Garin Muhammad Akbar
+* **NIM**: 202210370311158
+* **Program Studi**: Teknik Informatika
+* **Institusi**: Universitas Muhammadiyah Malang
 
 ---
+
 **© 2025 | Academic Research Tool | UAP Project Edition**
