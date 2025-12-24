@@ -210,6 +210,22 @@ Analisis Singkat:
   </tr>
 </table>
 
+<h2><b>Visualisasi Perbandingan 📊</b></h2>
+<p>Berikut adalah visualisasi perbandingan untuk setiap model.</p>
+
+<table align="center">
+  <tr>
+    <td align="center">
+      <b>Bar Chart Perbandingan Akurasi Model</b><br>
+      <img src="assets/images/Perbandingan_Akurasi.PNG" width="350px">
+    </td>
+    <td align="center">
+      <b>Bar Chart Perbandingan Presisi Recall F1-Score</b><br>
+      <img src="assets/images/Perbandingan_PRF1.PNG" width="350px">
+    </td>
+  </tr>
+</table>
+
 <h1 id="dashboard" align="center">🧠 Alzheimer Disease Stage Diagnostics 🧠</h1>
 
 <p align="center">
