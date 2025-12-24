@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  Sumber Image : <a href="[https://share.google/images/DDfO5yEbx6us0Cj8h](https://www.shutterstock.com/image-photo/haze-brain-alzheimer-600nw-2651172251.jpg)">Access Here</a>
+  Sumber Image : <a href="[https://www.shutterstock.com/image-photo/haze-brain-alzheimer-600nw-2651172251.jpg](https://www.shutterstock.com/image-photo/haze-brain-alzheimer-600nw-2651172251.jpg)">Access Here</a>
 </p>
 
 ---
