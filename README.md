@@ -177,15 +177,15 @@ Analisis Singkat:
   <tr>
     <td align="center">
       <b>CNN Baseline</b><br>
-      <img src="assets/images/Confusion_Matrix_Baseline.PNG" width="180px">
+      <img src="assets/images/Confusion_Matrix_Baseline.PNG" width="350px">
     </td>
     <td align="center">
       <b>MobileNetV2</b><br>
-      <img src="assets/images/Confusion_Matrix_MobileNetV2.PNG" width="180px">
+      <img src="assets/images/Confusion_Matrix_MobileNetV2.PNG" width="350px">
     </td>
     <td align="center">
       <b>VGG16</b><br>
-      <img src="assets/images/Confusion_Matrix_VGG16.PNG" width="180px">
+      <img src="assets/images/Confusion_Matrix_VGG16.PNG" width="350px">
     </td>
   </tr>
 </table>
@@ -197,15 +197,31 @@ Analisis Singkat:
   <tr>
     <td align="center">
       <b>CNN Learning Curve</b><br>
-      <img src="assets/images/grafik_cnn.PNG" width="350px">
+      <img src="assets/images/Grafik_CNN.PNG" width="350px">
     </td>
     <td align="center">
       <b>MobileNetV2 Learning Curve</b><br>
-      <img src="assets/images/grafik_efficient.PNG" width="350px">
+      <img src="assets/images/Grafik_MobileNetV2.PNG" width="350px">
     </td>
     <td align="center" colspan="2">
       <b>VGG16 Learning Curve</b><br>
-      <img src="assets/images/grafik_vit.PNG" width="350px">
+      <img src="assets/images/Grafik_VGG16.PNG" width="350px">
+    </td>
+  </tr>
+</table>
+
+<h2><b>Visualisasi Perbandingan 📊</b></h2>
+<p>Berikut adalah visualisasi perbandingan untuk setiap model.</p>
+
+<table align="center">
+  <tr>
+    <td align="center">
+      <b>Bar Chart Perbandingan Akurasi Model</b><br>
+      <img src="assets/images/Perbandingan_Akurasi.PNG" width="350px">
+    </td>
+    <td align="center">
+      <b>Bar Chart Perbandingan Presisi Recall F1-Score</b><br>
+      <img src="assets/images/Perbandingan_PRF1.PNG" width="350px">
     </td>
   </tr>
 </table>
