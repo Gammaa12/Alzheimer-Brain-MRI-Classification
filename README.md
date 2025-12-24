@@ -20,6 +20,7 @@
   - [Preprocessing Data](#preprocessing-data)
   - [Pemodelan](#pemodelan)
 - [Hasil & Evaluasi](#hasil--evaluasi)
+- [Langkah Instalasi](#instalasi)
 - [Dashboard](#dashboard)
 
 ---
@@ -220,6 +221,40 @@ Berikut adalah perbandingan metrik evaluasi untuk setiap model:
   </tr>
 </table>
 
+---
+
+<h1 id="instalasi" align="center">🔧 Langkah Instalasi 🔧</h1>
+
+### Software Utama
+Proyek ini dapat dijalankan menggunakan **Google Colab** atau **VS Code**. Pastikan **Python 3.10** atau **3.11** telah terinstal di sistem Anda.
+
+### Dependensi
+Seluruh library yang diperlukan telah disediakan dalam file `requirements.txt`. Anda dapat menginstalnya dengan salah satu cara berikut:
+
+#### Cara 1: Instalasi Langsung (Direkomendasikan)
+Jalankan perintah berikut di terminal:
+```bash
+pip install -r requirements.txt
+
+#### Cara 2: Instalasi Manual
+Jika ingin menginstal satu per satu (misal menggunakan PDM atau Pip):
+```bash
+pip install streamlit==1.37.0
+pip install tensorflow==2.19.0
+pip install keras==3.10.0
+
+#### Menjalankan Sistem Prediksi
+Untuk menjalankan dashboard sistem prediksi di lokal, buka terminal dan jalankan perintah berikut:
+```bash
+streamlit run alzheimer.py
+
+#### Melatih Ulang Model
+Jika Anda ingin melatih model dari awal menggunakan dataset baru, silakan jalankan file notebook yang tersedia:
+- Buka file Notebook-Model.ipynb di Google Colab.
+- Pastikan runtime menggunakan GPU untuk proses yang lebih cepat.
+
+---
+
 <h1 id="dashboard" align="center">🧠 Alzheimer Disease Stage Diagnostics 🧠</h1>
 
 <p align="center">
@@ -269,36 +304,12 @@ Berikut adalah perbandingan metrik evaluasi untuk setiap model:
 
 ---
 
-## 🛠️ Cara Menggunakan Dashboard di Lokal
-
-### 1. Prasyarat 
-Pastikan Anda sudah menginstal Python 3.10 atau 3.11 (Direkomendasikan).
-
-### 2. Cara Menjalankan
-- Clone atau Download Project
-- Pastikan struktur folder Anda seperti ini:
-  - UAP/
-    - alzheimer.py          
-    - models/               
-      - model_alzheimer_base.keras
-      - model_alzheimer_mobilenet.keras
-      - vgg16_best_model.keras
-      - class_names      
-    - requirements.txt
-- Buat Virtual Environment (Sangat Disarankan)
-- Instal Library (Versi Spesifik)
-  - pip install tensorflow==2.19.0 keras==3.10.0 streamlit numpy pandas Pillow plotly
-- Jalankan Aplikasi
-  - streamlit run alzheimer.py
----
-
 ## 🔬 Metodologi & Riset
 Dashboard ini merupakan implementasi praktis dari **riset klasifikasi neurodegeneratif**. Dengan membandingkan **model manual (Custom CNN) dan Transfer Learning (VGG & MobileNet)**, aplikasi ini mendemonstrasikan bagaimana teknologi AI dapat membantu tenaga medis dalam mempercepat proses **skrining awal penyakit Alzheimer secara non-invasif**.
 
 ---
 
-## ⚖️ Lisensi
-Proyek ini didistribusikan di bawah **MIT License**. Data yang digunakan dalam demo ini bertujuan untuk kepentingan edukasi dan riset teknologi.
+
 
 ---
 **© 2025 | Academic Research Tool | UAP Project Edition**
