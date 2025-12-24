@@ -158,17 +158,11 @@ Berikut adalah penjelasan tentang metrik yang digunakan dalam classification rep
 
 Berikut adalah perbandingan metrik evaluasi untuk setiap model:
 
-| Model & Pendekatan                | Arsitektur      | Akurasi | Precision | Recall | F1-Score |
-|-----------------------------------|-----------------|---------|-----------|--------|----------|
-| Custom CNN Baseline               | CNN             | 0.78    | 0.78      | 0.78   | 0.77     |
-| MobileNetV2 Fine-Tuning           | MobileNetV2     | 0.86    | 0.85      | 0.86   | 0.85     |
-| VGG16 Fine-Tuning                 | VGG16           | 0.84    | 0.89      | 0.84   | 0.84     |
-
-Analisis Singkat:
-
-- MobileNetV2 memberikan performa keseluruhan terbaik dengan akurasi 0.86 (86%), menunjukkan bahwa arsitektur yang ringan dengan Inverted Residuals sangat efektif untuk mengenali pola citra MRI ini.
-- VGG16 unggul dalam nilai Precision (0.89), yang berarti model ini sangat baik dalam meminimalkan kesalahan prediksi positif (sangat akurat dalam menentukan stadium tertentu tanpa banyak salah tebak).
-- Custom CNN berfungsi sebagai baseline yang cukup solid dengan akurasi 0.78, namun masih di bawah performa model Transfer Learning yang memiliki pengetahuan awal dari ImageNet.
+| Model & Pendekatan                | Arsitektur      | Akurasi | Precision | Recall | F1-Score | Hasil Analisis |
+|-----------------------------------|-----------------|---------|-----------|--------|----------|----------------|
+| Custom CNN Baseline               | CNN             | 0.78    | 0.78      | 0.78   | 0.77     | Custom CNN berfungsi sebagai baseline yang cukup solid dengan akurasi 0.78, namun masih di bawah performa model Transfer Learning yang memiliki pengetahuan awal dari ImageNet. |
+| MobileNetV2 Fine-Tuning           | MobileNetV2     | 0.86    | 0.85      | 0.86   | 0.85     | MobileNetV2 memberikan performa keseluruhan terbaik dengan akurasi 0.86 (86%), menunjukkan bahwa arsitektur yang ringan dengan Inverted Residuals sangat efektif untuk mengenali pola citra MRI ini. |
+| VGG16 Fine-Tuning                 | VGG16           | 0.84    | 0.89      | 0.84   | 0.84     | VGG16 unggul dalam nilai Precision (0.89), yang berarti model ini sangat baik dalam meminimalkan kesalahan prediksi positif (sangat akurat dalam menentukan stadium tertentu tanpa banyak salah tebak). |
 
 <h2><b>Confusion Matrix 🔴🟢</b></h2>
 <p>Di bawah ini adalah confusion matrix untuk 3 model.</p>
@@ -239,52 +233,50 @@ Analisis Singkat:
   <a href="https://alzheimer-brain-mri-classification.streamlit.app/">alzheimer-brain-mri-classification.streamlit.app</a>
 </p>
 
-**GrowthVision AI** adalah sistem berbasis web yang dirancang untuk melakukan klasifikasi morfologi wajah pada anak guna mendukung analisis pertumbuhan pediatrik. Proyek ini memanfaatkan teknologi *Deep Learning* dengan arsitektur **CNN** dan **EfficientNet-B0** yang dioptimalkan menggunakan teknik **LoRA (Low-Rank Adaptation)**.
+**Neuro-Diagnostic Lab** adalah aplikasi berbasis web yang dirancang untuk **mengklasifikasikan stadium penyakit Alzheimer berdasarkan citra MRI otak**. Sistem ini mengintegrasikan tiga arsitektur Deep Learning **(Base CNN, MobileNetV2, dan VGG16)** menggunakan backend Keras 3 untuk memberikan hasil diagnosa yang objektif dan terukur.
 
 ---
 
 ## 🚀 Fitur Utama
-- **Batch Processing**: Mampu melakukan analisis hingga 20 subjek secara acak sekaligus.
-- **Inference Models**: Pilihan arsitektur model antara EfficientNet + LoRA, CNN Fine-Tuning, atau SVM Klasik.
-- **Visualisasi Real-time**: Hasil prediksi dilengkapi dengan *Confidence Score* menggunakan Gauge Chart interaktif.
-- **Export Data**: Pengguna dapat mengunduh hasil analisis dalam format CSV untuk keperluan statistik lebih lanjut.
+- **Multi-Model Inference: Pengguna dapat memilih arsitektur spesifik atau menggunakan fitur "Bandingkan Semua Model" untuk melihat konsistensi prediksi antar arsitektur.**
+- **Single & Batch Analysis: Mendukung unggahan satu gambar untuk diagnosa mendalam atau banyak gambar (batch) sekaligus untuk efisiensi waktu.**
+- **Catatan Klinis Otomatis: Setiap hasil prediksi dilengkapi dengan deskripsi akademis mengenai kondisi kognitif pasien berdasarkan stadium yang terdeteksi.**
+- **Visualisasi Interaktif: Dilengkapi dengan bar chart dari Plotly untuk membandingkan tingkat keyakinan (Confidence Score) antar model secara real-time.**
 
 ---
 
 ## 🛠️ Cara Menggunakan Dashboard
 
-### 1. Memilih Sumber Data
-Terdapat dua metode input pada panel kiri (Sidebar):
-* **Sampel Acak GitHub**: Sistem akan mengambil 20 gambar secara acak dari dataset penelitian yang tersimpan di folder `samples`.
-* **Upload Manual**: Pengguna dapat mengunggah foto subjek sendiri (format .jpg, .png, atau .jpeg).
+### 1. Konfigurasi Analisis (Sidebar)
+- Pilih Metode: Tentukan apakah ingin menganalisis satu citra MRI (Analisis Tunggal) atau banyak citra sekaligus (Analisis Batch).
+- Pilih Arsitektur: Pilih salah satu dari tiga model tersedia (Base CNN, MobileNetV2, VGG16) atau pilih opsi perbandingan untuk menjalankan ketiganya secara simultan.
 
-### 2. Menjalankan Analisis
-* Pilih arsitektur model yang diinginkan pada menu drop-down.
-* Klik tombol **🚀 RUN INFERENCE**.
-* Tunggu hingga progress bar mencapai 100%.
+### 2. Input Citra MRI
+- Unggah file gambar MRI dalam format JPG, JPEG, atau PNG.
+- Sistem akan melakukan preprocessing otomatis (resize 224x224 dan normalisasi) sesuai standar model yang dipilih.
 
-### 3. Membaca Hasil
-* **Classification Summary**: Ringkasan total jumlah subjek yang terdeteksi sebagai **VP-0 (Proportional)** dan **VP-1 (Linear)**.
-* **Individual Analysis**: Detail hasil per gambar lengkap dengan persentase keyakinan model.
-* **Download Report**: Klik tombol unduh di bagian bawah untuk menyimpan tabel hasil.
+### 3. Interpretasi Hasil
+- Resume Diagnosa: Lihat stadium yang terdeteksi (misal: Very Mild Demented).
+- Tingkat Keyakinan: Persentase probabilitas model terhadap hasil klasifikasi.
+- Informasi Klinis: Penjelasan singkat mengenai dampak stadium tersebut terhadap kemampuan kognitif pasien.
 
 ---
 
 ## 📂 Struktur Repositori
-- `app.py`: File utama aplikasi Streamlit.
-- `samples/`: Folder berisi dataset gambar sampel untuk demo.
-- `requirements.txt`: Daftar library Python yang dibutuhkan (PyTorch, Streamlit, Plotly, dll).
+- `alzheimer.py`: Script utama aplikasi Streamlit (Backend Keras 3).
+- `models/`: Direktori penyimpanan model .keras dan file metadata class_names.
+- `requirements.txt`: Daftar pustaka yang dibutuhkan (Keras, TensorFlow, Plotly, Pillow).
 - `README.md`: Dokumentasi proyek.
 
 ---
 
 ## 🔬 Metodologi & Riset
-Sistem ini dikembangkan sebagai bagian dari tugas besar mata kuliah **Machine Learning**. Fokus riset ini adalah mengimplementasikan teknik *transfer learning* dan efisiensi model melalui **LoRA** untuk mengenali fitur morfologi wajah yang berkaitan dengan pola pertumbuhan (Visual Proxy) pada anak-anak.
+Dashboard ini merupakan implementasi praktis dari **riset klasifikasi neurodegeneratif**. Dengan membandingkan **model manual (Custom CNN) dan Transfer Learning (VGG & MobileNet)**, aplikasi ini mendemonstrasikan bagaimana teknologi AI dapat membantu tenaga medis dalam mempercepat proses **skrining awal penyakit Alzheimer secara non-invasif**.
 
 ---
 
 ## ⚖️ Lisensi
-Proyek ini didistribusikan di bawah **MIT License**. Data yang digunakan dalam demo ini bertujuan untuk kepentingan edukasi dan riset teknologi *screening* awal non-medis.
+Proyek ini didistribusikan di bawah **MIT License**. Data yang digunakan dalam demo ini bertujuan untuk kepentingan edukasi dan riset teknologi.
 
 ---
-**© 2024 | Machine Learning**
+**© 2025 | Academic Research Tool | UAP Project Edition**
