@@ -261,13 +261,35 @@ Berikut adalah perbandingan metrik evaluasi untuk setiap model:
 - Informasi Klinis: Penjelasan singkat mengenai dampak stadium tersebut terhadap kemampuan kognitif pasien.
 
 ---
-
 ## 📂 Struktur Repositori
 - `alzheimer.py`: Script utama aplikasi Streamlit (Backend Keras 3).
 - `models/`: Direktori penyimpanan model .keras dan file metadata class_names.
 - `requirements.txt`: Daftar pustaka yang dibutuhkan (Keras, TensorFlow, Plotly, Pillow).
 - `README.md`: Dokumentasi proyek.
 
+---
+
+## 🛠️ Cara Menggunakan Dashboard di Lokal
+
+### 1. Prasyarat 
+Pastikan Anda sudah menginstal Python 3.10 atau 3.11 (Direkomendasikan).
+
+### 2. Cara Menjalankan
+- Clone atau Download Project
+- Pastikan struktur folder Anda seperti ini:
+  - UAP/
+    - alzheimer.py          
+    - models/               
+      - model_alzheimer_base.keras
+      - model_alzheimer_mobilenet.keras
+      - vgg16_best_model.keras
+      - class_names      
+    - requirements.txt
+- Buat Virtual Environment (Sangat Disarankan)
+- Instal Library (Versi Spesifik)
+  - pip install tensorflow==2.19.0 keras==3.10.0 streamlit numpy pandas Pillow plotly
+- Jalankan Aplikasi
+  - streamlit run alzheimer.py
 ---
 
 ## 🔬 Metodologi & Riset
