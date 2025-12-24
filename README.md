@@ -78,12 +78,14 @@ Melalui pendekatan ini, diharapkan proses pemantauan kesehatan saraf pasien dapa
 Dataset yang digunakan dalam proyek ini adalah **Augmented Alzheimer MRI Dataset**, yang diperoleh dari platform Kaggle. Dataset ini terdiri dari citra medis MRI otak yang telah dikumpulkan dan diproses untuk membantu tugas klasifikasi penyakit neurodegeneratif.
 
 Dataset ini mencakup 4 kelas tingkat keparahan Alzheimer:
+
 - **Non Demented**: Citra otak normal tanpa tanda-tanda atrofi yang signifikan.
 - **Very Mild Demented**: Tahap awal di mana gejala mulai muncul secara samar.
 - **Mild Demented**: Tahap ringan dengan pola penyusutan jaringan otak yang mulai terlihat jelas.
 - **Moderate Demented**: Tahap menengah dengan indikasi atrofi yang kuat pada area hipokampus dan korteks.
 
 Detail Pemrosesan Dataset:
+
 - **Keseimbangan Data: Dataset telah melalui proses augmentation (penambahan data buatan) untuk memastikan setiap kelas memiliki jumlah sampel yang seimbang (1.250 citra per kelas dalam folder training), guna menghindari bias pada model.**
 - **Pre-processing: Citra diproses ke dalam format $224 \times 224$ piksel dan dilakukan normalisasi nilai pixel sesuai standar masing-masing arsitektur (VGG16 & MobileNetV2).**
 - **Pembagian Data: Dataset dibagi secara sistematis ke dalam tiga bagian: Train, Validation, dan Test.**
@@ -96,72 +98,44 @@ Link Original Dataset: [Augmented Alzheimer MRI Dataset (Kaggle)](https://www.ka
 
 <h2 id="preprocessing-data" align="center">✨ Preprocessing Data ✨</h2>
 
-Tahap preprocessing dimulai dengan memuat dataset wajah anak dari direktori yang telah diatur. Seluruh citra kemudian diproses menggunakan **MTCNN (Multi-Task Cascaded Convolutional Network)** untuk mendeteksi dan memotong area wajah sehingga model hanya mempelajari fitur visual yang relevan dan tidak terdistraksi oleh latar belakang. Setelah wajah berhasil diekstraksi, citra di-*resize* menjadi **224×224 piksel** dan dinormalisasi menggunakan **mean–std normalization** mengikuti standar input model pre-trained seperti EfficientNet dan Vision Transformer.
+Tahap preprocessing dilakukan secara sistematis menggunakan pipeline tf.data untuk memastikan efisiensi memori dan kecepatan training. Seluruh citra MRI dimuat dengan ukuran 224×224 piksel dalam format warna RGB.
 
-Untuk meningkatkan keragaman data dan mencegah overfitting, beberapa teknik **data augmentation** diterapkan, yaitu: rotasi acak, horizontal flip, random cropping, serta penyesuaian brightness–contrast. Dataset dibagi menggunakan **stratified split**, yaitu 80% data latih dan 20% data uji, untuk memastikan distribusi kelas **VP-0** dan **VP-1** tetap seimbang.  
-Tahap preprocessing ini memastikan bahwa dataset yang digunakan bersih, konsisten, dan siap dipakai untuk seluruh eksperimen model.
+Proses utama dalam tahap ini meliputi:
 
----
+- **Normalisasi Spesifik Model: Menggunakan fungsi preprocess_input yang berbeda untuk setiap arsitektur. MobileNetV2 memerlukan rentang piksel [-1, 1], sementara VGG16 menggunakan normalisasi berbasis mean ImageNet.**
+- **Data Augmentation: Untuk meningkatkan variasi data dan mencegah overfitting, diterapkan teknik rotasi acak (0.05), random zoom (0.05), serta penyesuaian kontras secara real-time pada data training.**
+- **Optimization: Dataset dioptimalkan menggunakan fungsi .cache() untuk mempercepat akses data dari memori dan .prefetch(tf.data.AUTOTUNE) agar proses penyiapan data tidak menghambat proses pelatihan model di GPU.**
+- **Dataset Splitting: Data dibagi menjadi tiga bagian (Train, Val, Test) untuk memastikan model diuji pada data yang belum pernah dilihat sebelumnya guna menjamin objektivitas hasil.**
 
 <h2 id="pemodelan" align="center">🤖 Pemodelan 🤖</h2>
 
-Penelitian ini menggunakan dua pendekatan utama: **(1) Handcrafted Features + Classic ML**, **(2) Deep Learning Modern (CNN, EfficientNet, dan ViT)**.  
-Seluruh model dibandingkan untuk menentukan pendekatan paling ideal dalam mendeteksi Visual Proxy pada wajah anak.
+Penelitian ini menggunakan tiga pendekatan Deep Learning yang berbeda untuk membandingkan efektivitas antara arsitektur sederhana dengan arsitektur state-of-the-art berbasis Transfer Learning.
 
----
+### 🟦 A. Custom CNN (Baseline)
+Model ini dibangun sebagai standar dasar untuk melihat seberapa baik jaringan saraf konvensional menangkap fitur MRI tanpa bantuan pre-trained weights.
 
-### 🟦 **A. EfficientNet-B0 (Model Utama)**
+- **Arsitektur: 4 Blok Konvolusi dengan jumlah filter yang meningkat (32, 64, 128, 256).**
+- **Teknik Khusus: Penggunaan BatchNormalization setelah setiap layer konvolusi untuk menstabilkan proses training dan GlobalAveragePooling2D untuk efisiensi parameter.**
 
-EfficientNet-B0 dipilih karena merupakan CNN modern dengan efisiensi tinggi. Teknik **compound scaling** digunakan untuk menyeimbangkan *depth*, *width*, dan *resolution*, sehingga menghasilkan representasi fitur yang kuat pada citra wajah.
+### 🟨 B. MobileNetV2 (Efficient Transfer Learning)
+Dipilih karena keseimbangannya yang luar biasa antara kecepatan dan akurasi, sangat cocok untuk implementasi perangkat medis portabel.
 
-Tiga eksperimen dilakukan:
+- **Partial Fine-Tuning: Membuka 20 layer terakhir untuk melatih ulang bobot agar lebih sensitif terhadap tekstur MRI Alzheimer.**
+- **Regularisasi: Menambahkan layer Dense (512 unit) dengan L2 Regularization dan Dropout(0.6) untuk menangani kompleksitas data.**
 
-#### **1. Baseline EfficientNet**
-- Classification head diubah menjadi Linear (1280 → 2)
-- Training selama 10 epoch
-- Optimizer Adam, LR = 1e-4  
+### 🟥 C. VGG16 (Advanced Fine-Tuning)
+Model ini digunakan untuk mengekstraksi fitur yang lebih mendalam melalui arsitektur yang sangat terstruktur.
 
-#### **2. Fine-Tuning Standar**
-- 40 layer teratas EfficientNet dibuka untuk dilatih ulang
-- Meningkatkan kemampuan model dalam mengenali pola visual halus  
+- **Deep Adaptation: Melakukan unfreeze pada Block 4 dan Block 5 sehingga filter konvolusi tingkat tinggi dapat beradaptasi dengan pola atrofi otak.**
+- **Heavy Classifier: Menggunakan dua lapisan Dense besar (1024 dan 512 unit) untuk memastikan seluruh fitur visual yang diekstraksi dapat terklasifikasi dengan tepat ke dalam 4 stadium Alzheimer.**
 
-#### **3. Fine-Tuning + LoRA (Low-Rank Adaptation)**  
-Pendekatan paling efisien sekaligus paling akurat:
-- LoRA ditambahkan pada pointwise convolution
-- Hanya parameter ber-rank rendah yang diperbarui
-- Komputasi lebih ringan dibanding full fine-tuning  
+### 🟩 D. Strategi Optimasi & Pelatihan
+Seluruh model dilatih menggunakan:
 
----
-
-### 🟪 **B. Vision Transformer (ViT-Base Patch16/224)**
-
-Sebagai pembanding, digunakan Vision Transformer model dasar:
-
-- Pre-trained ImageNet
-- Classification head diganti menjadi Linear (768 → 2)
-- Dilatih sebagai baseline (tanpa LoRA)
-
----
-
-### 🟩 **C. Model Handcrafted Features + Machine Learning**
-
-Selain deep learning, penelitian juga mengevaluasi kombinasi fitur manual:
-
-- **Landmark**
-- **GLCM**
-- **CCM**
-- **SIFT**
-- **LBP**
-- **HOG**
-- **Gabor**
-- **Color Moments**
-- **Edge**
-
-Setiap fitur atau kombinasi fitur diuji menggunakan:
-
-- **SVM**
-- **Random Forest**
-- **K-NN**
+- **Optimizer: Adam dengan learning rate yang disesuaikan (lebih rendah untuk transfer learning agar tidak merusak bobot asli).**
+- **Callbacks: - EarlyStopping: Menghentikan latih jika tidak ada perbaikan pada akurasi validasi.**
+- **ReduceLROnPlateau: Menurunkan learning rate saat model mulai jenuh untuk menemukan titik minimum loss yang lebih global.**
+- **ModelCheckpoint: Menyimpan versi terbaik dari setiap model secara otomatis.**
 
 ---
 
@@ -184,102 +158,40 @@ Berikut adalah penjelasan tentang metrik yang digunakan dalam classification rep
 
 Berikut adalah perbandingan metrik evaluasi untuk setiap model:
 
-| Model Fitur                        | Algoritma       | Akurasi | Precision | Recall | F1-Score |
-|-----------------------------------|------------------|---------|-----------|--------|----------|
-| Baseline                          | SVM              | 0.91    | 0.93      | 0.90   | 0.91     |
-| Baseline                          | Random Forest    | 0.90    | 0.92      | 0.89   | 0.90     |
-| Baseline                          | K-NN             | 0.88    | 0.97      | 0.80   | 0.87     |
-| Landmark                          | SVM              | 0.86    | 0.90      | 0.83   | 0.86     |
-| Landmark                          | Random Forest    | 0.85    | 0.87      | 0.85   | 0.86     |
-| Landmark                          | K-NN             | 0.85    | 0.88      | 0.83   | 0.85     |
-| Landmark + GLCM                   | SVM              | 0.86    | 0.91      | 0.82   | 0.86     |
-| Landmark + GLCM                   | Random Forest    | 0.87    | 0.91      | 0.84   | 0.87     |
-| Landmark + GLCM                   | K-NN             | 0.87    | 0.91      | 0.84   | 0.87     |
-| Landmark + GLCM + CCM             | SVM              | 0.87    | 0.90      | 0.85   | 0.87     |
-| Landmark + GLCM + CCM             | Random Forest    | 0.86    | 0.89      | 0.84   | 0.86     |
-| Landmark + GLCM + CCM             | K-NN             | 0.84    | 0.87      | 0.82   | 0.84     |
-| Landmark + GLCM + CCM + SIFT      | SVM              | 0.85    | 0.89      | 0.82   | 0.85     |
-| Landmark + GLCM + CCM + SIFT      | Random Forest    | 0.87    | 0.92      | 0.82   | 0.87     |
-| Landmark + GLCM + CCM + SIFT      | K-NN             | 0.81    | 0.82      | 0.82   | 0.82     |
-| LBP                               | SVM              | 0.80    | 0.82      | 0.79   | 0.80     |
-| LBP                               | Random Forest    | 0.76    | 0.76      | 0.79   | 0.77     |
-| LBP                               | K-NN             | 0.76    | 0.75      | 0.79   | 0.77     |
-| LBP + HOG                         | SVM              | 0.83    | 0.85      | 0.82   | 0.84     |
-| LBP + HOG                         | Random Forest    | 0.80    | 0.79      | 0.85   | 0.82     |
-| LBP + HOG                         | K-NN             | 0.73    | 0.86      | 0.58   | 0.69     |
-| LBP + HOG + GABOR                 | SVM              | 0.83    | 0.85      | 0.82   | 0.84     |
-| LBP + HOG + GABOR                 | Random Forest    | 0.82    | 0.81      | 0.87   | 0.84     |
-| LBP + HOG + GABOR                 | K-NN             | 0.73    | 0.86      | 0.58   | 0.69     |
-| LBP + HOG + GABOR + COLOR         | SVM              | 0.85    | 0.86      | 0.84   | 0.85     |
-| LBP + HOG + GABOR + COLOR         | Random Forest    | 0.86    | 0.85      | 0.89   | 0.87     |
-| LBP + HOG + GABOR + COLOR         | K-NN             | 0.73    | 0.86      | 0.58   | 0.69     |
-| LBP + HOG + GABOR + COLOR + EDGE  | SVM              | 0.85    | 0.86      | 0.84   | 0.85     |
-| LBP + HOG + GABOR + COLOR + EDGE  | Random Forest    | 0.85    | 0.85      | 0.87   | 0.86     |
-| LBP + HOG + GABOR + COLOR + EDGE  | K-NN             | 0.73    | 0.86      | 0.58   | 0.69     |
-| Baseline CNN                      | CNN              | 0.86    | 0.83      | 0.93   | 0.88     |
-| CNN + FT Standar                  | CNN              | 0.90    | 0.91      | 0.90   | 0.91     |
-| CNN + FT LoRA (Manual)            | CNN              | 0.89    | 0.91      | 0.89   | 0.90     |
-| CNN + FT LoRA (Library)           | CNN              | 0.89    | 0.91      | 0.87   | 0.89     |
-| Baseline EfficientNet             | EfficientNet     | 0.88    | 0.84      | 0.94   | 0.89     |
-| EfficientNet + FT Standar         | EfficientNet     | 0.97    | 0.99      | 0.95   | 0.97     |
-| EfficientNet + FT LoRA (Best)     | EfficientNet     | 0.98    | 0.99      | 0.97   | 0.98     |
-| Vision Transformer Baseline       | ViT              | 0.95    | 0.95      | 0.95   | 0.95     |
+| Model & Pendekatan                | Arsitektur      | Akurasi | Precision | Recall | F1-Score |
+|-----------------------------------|-----------------|---------|-----------|--------|----------|
+| Custom CNN Baseline               | CNN             | 0.78    | 0.78      | 0.78   | 0.77     |
+| MobileNetV2 Fine-Tuning           | MobileNetV2     | 0.86    | 0.85      | 0.86   | 0.85     |
+| VGG16 Fine-Tuning                 | VGG16           | 0.84    | 0.89      | 0.84   | 0.84     |
 
-Berikut adalah perbandingan metrik evaluasi terbaik:
-| Model Terbaik                              | Algoritma      | Akurasi | Precision | Recall | F1-Score |
-|---------------------------------------------|----------------|---------|-----------|--------|----------|
-| Baseline                                    | SVM            | 0.91    | 0.93      | 0.90   | 0.91     |
-| Landmark + GLCM                             | SVM            | 0.86    | 0.91      | 0.82   | 0.86     |
-| Landmark + GLCM + CCM + SIFT                | Random Forest  | 0.87    | 0.92      | 0.82   | 0.87     |
-| LBP + HOG + GABOR + COLOR                   | Random Forest  | 0.86    | 0.85      | 0.89   | 0.87     |
-| CNN + Fine-Tuning Standar                   | CNN            | 0.90    | 0.91      | 0.90   | 0.91     |
-| EfficientNet + Fine-Tuning + LoRA (BEST)    | EfficientNet   | 0.98    | 0.99      | 0.97   | 0.98     |
-| Vision Transformer Baseline                 | ViT            | 0.95    | 0.95      | 0.95   | 0.95     |
+Analisis Singkat:
+
+- MobileNetV2 memberikan performa keseluruhan terbaik dengan akurasi 0.86 (86%), menunjukkan bahwa arsitektur yang ringan dengan Inverted Residuals sangat efektif untuk mengenali pola citra MRI ini.
+- VGG16 unggul dalam nilai Precision (0.89), yang berarti model ini sangat baik dalam meminimalkan kesalahan prediksi positif (sangat akurat dalam menentukan stadium tertentu tanpa banyak salah tebak).
+- Custom CNN berfungsi sebagai baseline yang cukup solid dengan akurasi 0.78, namun masih di bawah performa model Transfer Learning yang memiliki pengetahuan awal dari ImageNet.
 
 <h2><b>Confusion Matrix 🔴🟢</b></h2>
-<p>Di bawah ini adalah confusion matrix untuk model terbaik.</p>
+<p>Di bawah ini adalah confusion matrix untuk 3 model.</p>
 
 <table align="center">
   <tr>
     <td align="center">
-      <b>SVM Baseline</b><br>
+      <b>CNN Baseline</b><br>
       <img src="assets/images/Confusion_Matrix_Baseline.PNG" width="180px">
     </td>
     <td align="center">
-      <b>SVM Landmark + GLCM</b><br>
-      <img src="assets/images/Confusion_Matrix_SVM_LG.PNG" width="180px">
+      <b>MobileNetV2</b><br>
+      <img src="assets/images/Confusion_Matrix_MobileNetV2.PNG" width="180px">
     </td>
     <td align="center">
-      <b>RF — LMRK + GLCM + CCM + SIFT</b><br>
-      <img src="assets/images/Confusion_Matrix_RF_fusion1.PNG" width="180px">
-    </td>
-  </tr>
-
-  <tr>
-    <td align="center">
-      <b>RF — LBP + HOG + Gabor + Color</b><br>
-      <img src="assets/images/Confusion_Matrix_RF_fusion2.PNG" width="180px">
-    </td>
-    <td align="center">
-      <b>CNN FT Standar</b><br>
-      <img src="assets/images/Confusion_Matrix_CNN_FT_Standar.PNG" width="180px">
-    </td>
-    <td align="center">
-      <b>EfficientNet + LoRA</b><br>
-      <img src="assets/images/Confusion_Matrix_FT_LoRA.PNG" width="180px">
-    </td>
-  </tr>
-
-  <tr>
-    <td align="center">
-      <b>Vision Transformer</b><br>
-      <img src="assets/images/Confusion_Matrix_ViT.PNG" width="180px">
+      <b>VGG16</b><br>
+      <img src="assets/images/Confusion_Matrix_VGG16.PNG" width="180px">
     </td>
   </tr>
 </table>
 
 <h2><b>Learning Curves 📈</b></h2>
-<p>Berikut adalah learning curves untuk model CNN, EfficientNet dan ViT.</p>
+<p>Berikut adalah learning curves untuk setiap model.</p>
 
 <table align="center">
   <tr>
@@ -288,30 +200,27 @@ Berikut adalah perbandingan metrik evaluasi terbaik:
       <img src="assets/images/grafik_cnn.PNG" width="350px">
     </td>
     <td align="center">
-      <b>EfficientNet Learning Curve</b><br>
+      <b>MobileNetV2 Learning Curve</b><br>
       <img src="assets/images/grafik_efficient.PNG" width="350px">
     </td>
-  </tr>
-
-  <tr>
     <td align="center" colspan="2">
-      <b>Vision Transformer Learning Curve</b><br>
+      <b>VGG16 Learning Curve</b><br>
       <img src="assets/images/grafik_vit.PNG" width="350px">
     </td>
   </tr>
 </table>
 
-<h1 id="dashboard" align="center">🔬 GrowthVision AI: Child Growth Classification 🔬</h1>
+<h1 id="dashboard" align="center">🧠 Alzheimer Disease Stage Diagnostics 🧠</h1>
 
 <p align="center">
-  <a href="https://child-growth-classification.streamlit.app/" target="_blank">
+  <a href="https://alzheimer-brain-mri-classification.streamlit.app/" target="_blank">
     <img src="https://static.streamlit.io/badges/streamlit_badge_black_white.svg" alt="Streamlit App">
   </a>
 </p>
 
 <p align="center">
   <strong>Live Demo:</strong> 
-  <a href="https://child-growth-classification.streamlit.app/">child-growth-classification.streamlit.app</a>
+  <a href="https://alzheimer-brain-mri-classification.streamlit.app/">alzheimer-brain-mri-classification.streamlit.app</a>
 </p>
 
 **GrowthVision AI** adalah sistem berbasis web yang dirancang untuk melakukan klasifikasi morfologi wajah pada anak guna mendukung analisis pertumbuhan pediatrik. Proyek ini memanfaatkan teknologi *Deep Learning* dengan arsitektur **CNN** dan **EfficientNet-B0** yang dioptimalkan menggunakan teknik **LoRA (Low-Rank Adaptation)**.
