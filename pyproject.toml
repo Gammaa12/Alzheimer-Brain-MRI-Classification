@@ -1,0 +1,23 @@
+[project]
+name = "UAP"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "Gammaa12", email = "muhakbar850@gmail.com"},
+]
+dependencies = [
+    "streamlit>=1.30.0",
+    "tensorflow==2.19.0",
+    "keras==3.10.0",
+    "numpy<2.0.0",
+    "Pillow",
+    "plotly",
+    "pandas",
+]
+requires-python = ">=3.10"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
