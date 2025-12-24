@@ -24,91 +24,72 @@
 
 ---
 
-<h1 id="deskripsi-proyek" align="center">📚 Deskripsi Proyek 📚</h1>
+<h1 id="deskripsi-proyek" align="center">🧠 Klasifikasi Penyakit Alzheimer 🧠</h1>
 
-Proyek ini bertujuan mengembangkan sistem klasifikasi citra wajah anak berdasarkan pola proporsi visual sebagai indikator awal pertumbuhan menggunakan pendekatan **Visual Proxy (VP)**.  
-Pendekatan ini bersifat **non-medis**, sehingga model tidak melakukan diagnosis kesehatan seperti stunting, melainkan hanya mendeteksi **pola atau proporsi wajah** yang dapat menjadi indikator awal potensi ketidakseimbangan pertumbuhan.
+Proyek ini berfokus pada pengembangan sistem klasifikasi otomatis untuk mendeteksi tingkat keparahan penyakit Alzheimer berdasarkan citra medis MRI (Magnetic Resonance Imaging). Dengan memanfaatkan teknik pemrosesan citra dan kecerdasan buatan, proyek ini bertujuan untuk membantu proses skrining awal dalam membedakan berbagai stadium atrofi otak.
 
-Dalam konsep Visual Proxy, wajah anak direpresentasikan menjadi dua kategori:
+Model ini dilatih untuk mengklasifikasikan citra MRI ke dalam 4 kategori klinis:
 
-- **VP-0 (Visually Proportional)** → proporsi wajah normal  
-- **VP-1 (Visually Linear)** → indikasi perbedaan proporsi wajah yang tidak proporsional
+- **Non Demented** → Kondisi otak normal tanpa indikasi demensia.
+- **Very Mild Demented** → Indikasi awal gejala demensia yang sangat ringan.
+- **Mild Demented** → Gejala demensia tingkat ringan dengan perubahan struktural otak yang mulai terlihat.
+- **Moderate Demented** → Penurunan fungsi kognitif dan atrofi otak tingkat sedang.
 
-Untuk menghasilkan model yang optimal, penelitian ini menguji berbagai pendekatan berbasis Machine Learning dan Deep Learning, yaitu:
+Untuk mendapatkan hasil klasifikasi yang paling akurat, penelitian ini menguji tiga pendekatan arsitektur Deep Learning yang berbeda:
 
-### 🔹 Handcrafted Feature Models  
-Menggunakan kombinasi fitur visual seperti:
-- Landmark
-- GLCM  
-- CCM  
-- SIFT  
-- LBP  
-- HOG  
-- Gabor  
-- Color Moment  
-- Edge Detection  
-
-Dengan algoritma: **SVM, Random Forest, dan K-NN**.
-
-### 🔹 CNN-Based Models  
-Meliputi:
-- **Baseline CNN**
-- **CNN Fine-Tuning**
-- **CNN LoRA (manual & library PEFT)**
-
-### 🔹 Pretrained Deep Learning Models  
-Dua arsitektur modern digunakan:
-
-1. **EfficientNet-B0**
-   - Baseline  
-   - Fine-Tuning  
-   - Fine-Tuning + LoRA (rank rendah untuk efisiensi GPU)
-
-2. **Vision Transformer (ViT-Base Patch16/224)**  
-   - Baseline (tanpa LoRA)
+- **1. Custom CNN (Baseline Model)**
+- **2. MobileNetV2 (Transfer Learning & Fine-Tuning)**
+- **3. VGG16 (Advanced Transfer Learning)**
 
 ---
 
 <h1 id="latar-belakang" align="center">🧠 Latar Belakang 🧠</h1>
 
-Masalah gangguan pertumbuhan seperti stunting masih menjadi isu kritis di berbagai negara berkembang. Deteksi dini merupakan langkah penting, namun metode tradisional masih bergantung pada peralatan medis, tenaga ahli, dan proses pengukuran manual yang dapat memakan waktu serta tidak selalu tersedia di lapangan.
+Penyakit Alzheimer merupakan gangguan neurodegeneratif progresif yang menjadi penyebab paling umum dari demensia di seluruh dunia. Penyakit ini menyebabkan penyusutan sel otak secara bertahap (atrofi), yang berdampak pada penurunan daya ingat, kemampuan berpikir, hingga perubahan perilaku secara drastis.
+Tantangan utama dalam penanganan Alzheimer adalah gejalanya yang seringkali dianggap sebagai proses penuaan normal pada tahap awal (Very Mild Demented). Padahal, intervensi medis akan jauh lebih efektif jika dilakukan sebelum kerusakan otak meluas ke stadium lanjut (Moderate Demented).
+Penggunaan citra Magnetic Resonance Imaging (MRI) merupakan salah satu standar emas untuk melihat perubahan struktur otak. Namun, menganalisis ratusan scan MRI secara manual memerlukan ketelitian tinggi, waktu yang lama, dan keahlian spesialis radiologi yang terbatas jumlahnya.
 
-Untuk itu, pendekatan Visual Proxy berbasis Deep Learning menjadi solusi non-medis yang cepat, efisien, serta tetap menjaga privasi data anak. Dengan hanya melihat pola visual wajah, sistem dapat membantu proses pemantauan awal tanpa intervensi medis langsung.
+Proyek ini hadir untuk menjawab tantangan tersebut dengan memanfaatkan teknologi Deep Learning. Dengan menggunakan model Custom CNN, MobileNetV2, dan VGG16, sistem ini dikembangkan untuk:
+
+- Otomatisasi Skrining: Membantu tenaga medis dalam melakukan klasifikasi stadium Alzheimer secara cepat dan objektif.
+- Deteksi Dini: Mengidentifikasi pola halus pada citra MRI yang mungkin terlewatkan dalam observasi visual manual, terutama pada fase Very Mild.
+- Akurasi Diagnostik: Memberikan perbandingan performa antara arsitektur model konvensional dan Transfer Learning untuk mendapatkan hasil klasifikasi yang paling reliabel.
+
+Melalui pendekatan ini, diharapkan proses pemantauan kesehatan saraf pasien dapat dilakukan secara lebih efisien, mendukung keputusan klinis yang lebih tepat, dan membantu perencanaan perawatan pasien dengan lebih baik.
 
 ---
 
 <h1 id="tujuan-pengembangan" align="center">🎯 Tujuan Pengembangan 🎯</h1>
 
-
-- **Mengembangkan model klasifikasi wajah anak** berdasarkan dua kategori Visual Proxy:
-  - **VP-0 (Visually Proportional)** — proporsi wajah normal  
-  - **VP-1 (Visually Linear)** — indikasi ketidakseimbangan proporsi wajah  
-- **Mengevaluasi dan membandingkan berbagai pendekatan Machine Learning & Deep Learning**, meliputi:
-  - Handcrafted features (Landmark, GLCM, CCM, SIFT, LBP, HOG, Gabor, Color, Edge)  
-  - CNN Baseline  
-  - CNN Fine-Tuning  
-  - CNN LoRA (manual & PEFT library)  
-  - EfficientNet-B0 (baseline, fine-tuning, fine-tuning + LoRA)  
-  - Vision Transformer (ViT) baseline
-- **Mengoptimalkan performa model menggunakan teknik Fine-Tuning dan LoRA**, untuk meningkatkan akurasi sekaligus mempertahankan efisiensi komputasi.
-- **Membangun sistem screening awal yang cepat, non-invasif, dan aman secara etika**, tanpa memerlukan data medis atau informasi sensitif anak.
-- **Menentukan model terbaik** yang mampu memberikan prediksi paling stabil dan akurat untuk digunakan pada proses monitoring pertumbuhan secara visual.
+- **Mengembangkan sistem klasifikasi citra MRI otak untuk mendeteksi penyakit Alzheimer secara otomatis ke dalam 4 kategori: Non Demented, Very Mild Demented, Mild Demented, dan Moderate Demented.**
+- **Mengevaluasi dan membandingkan performa tiga arsitektur Deep Learning, meliputi:**
+  - **Custom CNN**: Menguji efektivitas model yang dibangun dari awal dengan lapisan konvolusi mandiri.
+  - **MobileNetV2**: Menguji performa model pre-trained yang ringan dan efisien menggunakan teknik partial fine-tuning pada 20 layer terakhir.
+  - **VGG16**: Menguji kekuatan arsitektur yang lebih dalam dengan melakukan fine-tuning spesifik pada Block 4 dan Block 5 untuk menangkap detail tekstur otak yang kompleks.
+- **Mengoptimalkan akurasi model melalui teknik Transfer Learning dan Fine-Tuning, guna mengatasi keterbatasan data medis dan meningkatkan kemampuan generalisasi model terhadap data baru.**
+- **Menerapkan strategi pelatihan yang cerdas dengan menggunakan Callbacks seperti Early Stopping dan Learning Rate Reduction untuk mencegah overfitting dan memastikan konvergensi model yang stabil.**
+- **Menyediakan alat skrining awal (Decision Support System) yang dapat membantu tenaga medis dalam mendeteksi indikasi Alzheimer secara objektif, cepat, dan konsisten berdasarkan data citra digital.**
+- **Menentukan model terbaik (Best Model) berdasarkan metrik evaluasi seperti Akurasi, Loss, dan Confusion Matrix untuk digunakan sebagai standar dalam deteksi dini penyakit neurodegeneratif.**
 
 ---
 
 <h1 id="sumber-dataset" align="center">📊 Sumber Dataset 📊</h1>
 
-Dataset diperoleh dari platform Roboflow, berisi citra wajah anak-anak dengan dua kategori:
+Dataset yang digunakan dalam proyek ini adalah **Augmented Alzheimer MRI Dataset**, yang diperoleh dari platform Kaggle. Dataset ini terdiri dari citra medis MRI otak yang telah dikumpulkan dan diproses untuk membantu tugas klasifikasi penyakit neurodegeneratif.
 
-- **Healthy → VP-0**
-- **Stunting → VP-1**
+Dataset ini mencakup 4 kelas tingkat keparahan Alzheimer:
+- **Non Demented**: Citra otak normal tanpa tanda-tanda atrofi yang signifikan.
+- **Very Mild Demented**: Tahap awal di mana gejala mulai muncul secara samar.
+- **Mild Demented**: Tahap ringan dengan pola penyusutan jaringan otak yang mulai terlihat jelas.
+- **Moderate Demented**: Tahap menengah dengan indikasi atrofi yang kuat pada area hipokampus dan korteks.
 
-Dataset kemudian di-relabel ulang menggunakan format Visual Proxy, dan diproses ulang menjadi dataset wajah terpotong (face-cropped).
+Detail Pemrosesan Dataset:
+- **Keseimbangan Data: Dataset telah melalui proses augmentation (penambahan data buatan) untuk memastikan setiap kelas memiliki jumlah sampel yang seimbang (1.250 citra per kelas dalam folder training), guna menghindari bias pada model.**
+- **Pre-processing: Citra diproses ke dalam format $224 \times 224$ piksel dan dilakukan normalisasi nilai pixel sesuai standar masing-masing arsitektur (VGG16 & MobileNetV2).**
+- **Pembagian Data: Dataset dibagi secara sistematis ke dalam tiga bagian: Train, Validation, dan Test.**
 
-Link Original Dataset: 
-1. *[**STUNTING Computer Vision Dataset**](https://universe.roboflow.com/test-bdpwd/stunting-onvws)*
-2. *[**STUNTING Computer Vision Model**](https://universe.roboflow.com/mnt-bgmps/stunting-onvws-b12p5)*
-3. *[**Deteksi Stunting Computer Vision Model**](https://universe.roboflow.com/database-ayu/deteksi-stunting)*
+Link Original Dataset: [Augmented Alzheimer MRI Dataset (Kaggle)](https://www.kaggle.com/datasets/uraninjo/augmented-alzheimer-mri-dataset)
+
 ---
 
 <h1 id="preprocessing-dan-pemodelan" align="center">🧼 Preprocessing dan Pemodelan 🧼</h1>
