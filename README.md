@@ -158,9 +158,9 @@ Berikut adalah penjelasan tentang metrik yang digunakan dalam classification rep
 
 Berikut adalah perbandingan metrik evaluasi untuk setiap model:
 
-| Model & Pendekatan                | Arsitektur      | Akurasi | Precision | Recall | F1-Score |
-|-----------------------------------|-----------------|---------|-----------|--------|----------|
-| Custom CNN Baseline               | CNN             | 0.78    | 0.78      | 0.78   | 0.77     |
+| Model & Pendekatan                | Arsitektur      | Akurasi | Precision | Recall | F1-Score | Hasil Analisis |
+|-----------------------------------|-----------------|---------|-----------|--------|----------|----------------|
+| Custom CNN Baseline               | CNN             | 0.78    | 0.78      | 0.78   | 0.77     | Custom CNN berfungsi sebagai baseline yang cukup solid dengan akurasi 0.78, namun masih di bawah performa model Transfer Learning yang memiliki pengetahuan awal dari ImageNet. |
 | MobileNetV2 Fine-Tuning           | MobileNetV2     | 0.86    | 0.85      | 0.86   | 0.85     |
 | VGG16 Fine-Tuning                 | VGG16           | 0.84    | 0.89      | 0.84   | 0.84     |
 
